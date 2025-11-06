@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { persist } from 'zustand/middleware'; // <-- 1. Import persist
 import { Resume } from '@/types/resume';
 
 // Define the blank state
@@ -29,83 +30,80 @@ const LOCAL_STORAGE_KEY = 'dynamicResumeData';
 // Define the store's state and actions
 interface ResumeState {
   resume: Resume;
-  loadInitialResume: () => void;
+  // loadInitialResume is no longer needed!
   updateField: (path: string, value: any) => void;
   addSection: (section: keyof Resume, template: any) => void;
   updateStringArray: (path: string, value: string) => void;
 }
 
 export const useResumeStore = create(
-  immer<ResumeState>((set) => ({
-    resume: blankResume,
+  // 2. Wrap your immer middleware in persist
+  persist(
+    immer<ResumeState>((set) => ({
+      resume: blankResume,
 
-    // --- ACTIONS ---
+      // --- ACTIONS ---
 
-    // 1. Load data from Local Storage (only on client)
-    loadInitialResume: () => {
-      if (typeof window === 'undefined') return;
+      // 1. loadInitialResume() is GONE. persist handles this.
+      // 2. The manual .subscribe() is GONE. persist handles this.
+
+      // 3. The generic nested field updater (no change)
+      updateField: (path: string, value: any) => {
+        set((state) => {
+          const keys = path.split(".");
+          let current = state.resume as any;
+          for (let i = 0; i < keys.length - 1; i++) {
+            const key = keys[i];
+            if (current[key] === undefined || current[key] === null) {
+              current[key] = isNaN(Number(keys[i + 1])) ? {} : [];
+            }
+            current = current[key];
+          }
+          current[keys[keys.length - 1]] = value;
+        });
+      },
+
+      // 4. Add a new item to a resume section (no change)
+      addSection: (section: keyof Resume, template: any) => {
+        set((state) => {
+          const sectionArray = state.resume[section] as any[] | undefined;
+          if (Array.isArray(sectionArray)) {
+            sectionArray.push(template);
+          } else {
+            (state.resume[section] as any) = [template];
+          }
+        });
+      },
+
+      // 5. Handle comma-separated string-to-array conversion (no change)
+      updateStringArray: (path: string, value: string) => {
+        const arr = value.split(',').map(s => s.trim()).filter(Boolean);
+        set((state) => {
+          const keys = path.split(".");
+          let current = state.resume as any;
+          for (let i = 0; i < keys.length - 1; i++) {
+            current = current[keys[i]];
+          }
+          current[keys[keys.length - 1]] = arr;
+        });
+      },
+    })),
+    {
+      // 3. Configure persist
+      name: LOCAL_STORAGE_KEY, // This is the key it will use in localStorage
       
-      const savedResume = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (savedResume) {
-        try {
-          const parsed = JSON.parse(savedResume);
-          set((state) => {
-            state.resume = { ...blankResume, ...parsed };
-          });
-        } catch (e) {
-          console.error("Failed to parse resume data:", e);
+      // This merge function ensures that if you update blankResume,
+      // the new fields get merged correctly with the user's saved data.
+      merge: (persistedState, currentState) => {
+        return {
+          ...currentState,
+          ...(persistedState as ResumeState),
+          resume: {
+            ...currentState.resume,
+            ...(persistedState as ResumeState).resume,
+          }
         }
       }
-      
-      // Subscribe to future changes to save to local storage
-      useResumeStore.subscribe(
-        (state) => state.resume,
-        (resume) => {
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(resume));
-        },
-        { fireImmediately: false }
-      );
-    },
-
-    // 2. The generic nested field updater
-    updateField: (path: string, value: any) => {
-      set((state) => {
-        const keys = path.split(".");
-        let current = state.resume as any;
-        for (let i = 0; i < keys.length - 1; i++) {
-          const key = keys[i];
-          if (current[key] === undefined || current[key] === null) {
-            current[key] = isNaN(Number(keys[i + 1])) ? {} : [];
-          }
-          current = current[key];
-        }
-        current[keys[keys.length - 1]] = value;
-      });
-    },
-
-    // 3. Add a new item to a resume section (e.g., new job)
-    addSection: (section: keyof Resume, template: any) => {
-      set((state) => {
-        const sectionArray = state.resume[section] as any[] | undefined;
-        if (Array.isArray(sectionArray)) {
-          sectionArray.push(template);
-        } else {
-          (state.resume[section] as any) = [template];
-        }
-      });
-    },
-
-    // 4. Handle comma-separated string-to-array conversion
-    updateStringArray: (path: string, value: string) => {
-      const arr = value.split(',').map(s => s.trim()).filter(Boolean);
-      set((state) => {
-        const keys = path.split(".");
-        let current = state.resume as any;
-        for (let i = 0; i < keys.length - 1; i++) {
-          current = current[keys[i]];
-        }
-        current[keys[keys.length - 1]] = arr;
-      });
-    },
-  }))
+    }
+  )
 );

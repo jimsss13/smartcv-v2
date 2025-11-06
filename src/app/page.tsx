@@ -29,22 +29,22 @@ const TEMPLATE_KEY = 'selectedTemplate';
 export default function DynamicResumePage() {
   // --- STATE IS NOW FROM ZUSTAND ---
   const resume = useResumeStore((state) => state.resume);
-  const loadInitialResume = useResumeStore((state) => state.loadInitialResume);
+  // const loadInitialResume = useResumeStore((state) => state.loadInitialResume); // <-- NO LONGER NEEDED
 
   const [isClient, setIsClient] = useState(false);
   const [panelView, setPanelView] = useState<'edit' | 'design'>('edit');
   const [selectedTemplate, setSelectedTemplate] = useState('classic');
 
-  // Load data from store and template from local storage
+  // Load template from local storage
   useEffect(() => {
     setIsClient(true);
-    loadInitialResume(); // <-- Load from local storage into store
+    // loadInitialResume(); // <-- REMOVED THIS LINE
     
     const savedTemplate = localStorage.getItem(TEMPLATE_KEY);
     if (savedTemplate) {
       setSelectedTemplate(savedTemplate);
     }
-  }, [loadInitialResume]); // Runs once on client mount
+  }, []); // <-- REMOVED loadInitialResume from dependency array
 
   // Auto-save template choice
   useEffect(() => {

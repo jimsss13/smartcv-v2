@@ -2,22 +2,22 @@
 
 import { useState, useMemo } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useResumeStore } from "@/stores/resumeStore"; // <-- Import store
+import { useResumeStore } from "@/stores/resumeStore";
 
 // Import all form components
-import { BasicsForm } from "./form/BasicsForm";
-import { WorkForm } from "./form/WorkForm";
-import { EducationForm } from "./form/EducationForm";
-import { AdvisoryForm } from "./form/AdvisoryForm";
-import { SkillsForm } from "./form/SkillsForm";
-import { LanguagesForm } from "./form/LanguagesForm";
-import { InterestsForm } from "./form/InterestsForm";
-import { ProjectsForm } from "./form/ProjectsForm";
-import { AwardsForm } from "./form/AwardsForm";
-import { CertificatesForm } from "./form/CertificatesForm";
-import { PublicationsForm } from "./form/PublicationsForm";
-import { VolunteerForm } from "./form/VolunteerForm";
-import { ReferencesForm } from "./form/ReferencesForm";
+import { BasicsForm } from "@/components/form/BasicsForm";
+import { WorkForm } from "@/components/form/WorkForm";
+import { EducationForm } from "@/components/form/EducationForm";
+import { AdvisoryForm } from "@/components/form/AdvisoryForm";
+import { SkillsForm } from "@/components/form/SkillsForm";
+import { LanguagesForm } from "@/components/form/LanguagesForm";
+import { InterestsForm } from "@/components/form/InterestsForm";
+import { ProjectsForm } from "@/components/form/ProjectsForm";
+import { AwardsForm } from "@/components/form/AwardsForm";
+import { CertificatesForm } from "@/components/form/CertificatesForm";
+import { PublicationsForm } from "@/components/form/PublicationsForm";
+import { VolunteerForm } from "@/components/form/VolunteerForm";
+import { ReferencesForm } from "@/components/form/ReferencesForm";
 
 interface Props {
   selectedTemplate: string;
