@@ -1,17 +1,31 @@
-import { Resume } from "@/types/resume";
+import { Resume, Education as EducationType } from "@/types/resume";
 
 interface EducationProps {
-  education: Resume["education"];
+  education: EducationType[];
+}
+
+// Helper function to check if an education entry is actually empty (trims strings)
+function isEducationEmpty(edu: EducationType) {
+  if (!edu) return true;
+  return !edu.institution?.trim() && 
+         !edu.area?.trim() && 
+         !edu.studyType?.trim() && 
+         !edu.location?.trim();
 }
 
 export function Education({ education }: EducationProps) {
-  if (!education?.length) return null;
+  // 1. Filter out any education entries that are "empty"
+  const filteredEducation = education.filter(edu => !isEducationEmpty(edu));
+
+  // 2. If the filtered array is empty, render nothing at all.
+  if (filteredEducation.length === 0) return null;
+
   return (
     <section className="mb-8 break-inside-avoid">
       <h2 className="uppercase font-semibold tracking-wide border-b border-gray-400 pb-1 text-sm mb-3">
         Education
       </h2>
-      {education.map((edu, index) => (
+      {filteredEducation.map((edu, index) => (
         <div key={index} className="mb-3">
           <div className="flex justify-between items-baseline">
             <div>

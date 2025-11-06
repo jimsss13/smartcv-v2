@@ -1,17 +1,27 @@
-import { Resume } from "@/types/resume";
+import { Resume, Volunteer as VolunteerType } from "@/types/resume";
 
 interface VolunteerProps {
-  volunteer: Resume["volunteer"];
+  volunteer: VolunteerType[] | undefined;
+}
+
+function isVolunteerEmpty(vol: VolunteerType) {
+  if (!vol) return true;
+  return !vol.organization?.trim() && 
+         !vol.position?.trim() && 
+         !vol.startDate?.trim();
 }
 
 export function Volunteer({ volunteer }: VolunteerProps) {
-  if (!volunteer?.length) return null;
+  const filteredVolunteer = volunteer?.filter(v => !isVolunteerEmpty(v));
+
+  if (!filteredVolunteer || filteredVolunteer.length === 0) return null;
+
   return (
     <section className="mb-8 break-inside-avoid">
       <h2 className="uppercase font-semibold tracking-wide border-b border-gray-400 pb-1 text-sm mb-3">
         Volunteer
       </h2>
-      {volunteer.map((vol, index) => (
+      {filteredVolunteer.map((vol, index) => (
         <div key={index} className="mb-3">
           <h3 className="font-semibold">{vol.organization}</h3>
           <p className="text-sm italic">{vol.position}</p>

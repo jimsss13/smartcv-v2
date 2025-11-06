@@ -1,7 +1,26 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { persist } from 'zustand/middleware'; // <-- 1. Import persist
+import { persist } from 'zustand/middleware';
 import { Resume } from '@/types/resume';
+
+// --- Define blank "template" objects ---
+const blankWorkEntry = {
+  name: "", position: "", url: "", startDate: "", endDate: "", summary: "", highlights: []
+};
+const blankEducationEntry = {
+  institution: "", url: "", area: "", studyType: "", startDate: "", endDate: "", score: "", location: ""
+};
+const blankCertificateEntry = { name: "", issuer: "", date: "", url: "" };
+const blankPublicationEntry = { name: "", publisher: "", releaseDate: "", url: "", summary: "" };
+const blankSkillEntry = { name: "", level: "", keywords: [] };
+const blankAwardEntry = { title: "", date: "", awarder: "", summary: "" };
+const blankLanguageEntry = { language: "", fluency: "" };
+const blankInterestEntry = { name: "", keywords: [] };
+const blankProjectEntry = { name: "", startDate: "", endDate: "", description: "", highlights: [], url: "" };
+const blankReferenceEntry = { name: "", reference: "" };
+const blankVolunteerEntry = { organization: "", position: "", url: "", startDate: "", endDate: "", summary: "", highlights: [] };
+const blankAdvisoryEntry = { organization: "", position: "" };
+
 
 // Define the blank state
 const blankResume: Resume = {
@@ -11,43 +30,54 @@ const blankResume: Resume = {
     profiles: [],
     nationality: "",
   },
-  work: [],
-  education: [],
-  certificates: [],
-  publications: [],
-  skills: [],
-  awards: [],
-  languages: [],
-  interests: [],
-  projects: [],
-  references: [],
-  volunteer: [],
-  advisory: [],
+  work: [blankWorkEntry],
+  education: [blankEducationEntry],
+  certificates: [blankCertificateEntry],
+  publications: [blankPublicationEntry],
+  skills: [blankSkillEntry],
+  awards: [blankAwardEntry],
+  languages: [blankLanguageEntry],
+  interests: [blankInterestEntry],
+  projects: [blankProjectEntry],
+  references: [blankReferenceEntry],
+  volunteer: [blankVolunteerEntry],
+  advisory: [blankAdvisoryEntry],
 };
 
 const LOCAL_STORAGE_KEY = 'dynamicResumeData';
 
+// Helper map to enforce "at-least-one" rule
+const blankEntryMap: Record<keyof Resume, any> = {
+  basics: {}, // Not an array
+  work: blankWorkEntry,
+  education: blankEducationEntry,
+  certificates: blankCertificateEntry,
+  publications: blankPublicationEntry,
+  skills: blankSkillEntry,
+  awards: blankAwardEntry,
+  languages: blankLanguageEntry,
+  interests: blankInterestEntry,
+  projects: blankProjectEntry,
+  references: blankReferenceEntry,
+  volunteer: blankVolunteerEntry,
+  advisory: blankAdvisoryEntry,
+};
+
 // Define the store's state and actions
 interface ResumeState {
   resume: Resume;
-  // loadInitialResume is no longer needed!
   updateField: (path: string, value: any) => void;
   addSection: (section: keyof Resume, template: any) => void;
   updateStringArray: (path: string, value: string) => void;
 }
 
 export const useResumeStore = create(
-  // 2. Wrap your immer middleware in persist
   persist(
     immer<ResumeState>((set) => ({
       resume: blankResume,
 
-      // --- ACTIONS ---
+      // --- ACTIONS (No changes here) ---
 
-      // 1. loadInitialResume() is GONE. persist handles this.
-      // 2. The manual .subscribe() is GONE. persist handles this.
-
-      // 3. The generic nested field updater (no change)
       updateField: (path: string, value: any) => {
         set((state) => {
           const keys = path.split(".");
@@ -63,7 +93,6 @@ export const useResumeStore = create(
         });
       },
 
-      // 4. Add a new item to a resume section (no change)
       addSection: (section: keyof Resume, template: any) => {
         set((state) => {
           const sectionArray = state.resume[section] as any[] | undefined;
@@ -75,7 +104,6 @@ export const useResumeStore = create(
         });
       },
 
-      // 5. Handle comma-separated string-to-array conversion (no change)
       updateStringArray: (path: string, value: string) => {
         const arr = value.split(',').map(s => s.trim()).filter(Boolean);
         set((state) => {
@@ -89,20 +117,36 @@ export const useResumeStore = create(
       },
     })),
     {
-      // 3. Configure persist
-      name: LOCAL_STORAGE_KEY, // This is the key it will use in localStorage
+      name: LOCAL_STORAGE_KEY,
       
-      // This merge function ensures that if you update blankResume,
-      // the new fields get merged correctly with the user's saved data.
+      // --- THIS IS THE UPDATED MERGE FUNCTION ---
       merge: (persistedState, currentState) => {
-        return {
+        // Deep merge the persisted state onto the current (new) state
+        const mergedState = {
           ...currentState,
           ...(persistedState as ResumeState),
           resume: {
             ...currentState.resume,
-            ...(persistedState as ResumeState).resume,
+            ...((persistedState as ResumeState)?.resume || {}),
+          },
+        };
+
+        const mergedResume = mergedState.resume;
+
+        // --- ENFORCE "AT-LEAST-ONE" RULE ---
+        // This runs *after* loading from localStorage.
+        // It checks every array. If it's empty, it adds one blank entry.
+        Object.keys(blankEntryMap).forEach((key) => {
+          const resumeKey = key as keyof Resume;
+          if (resumeKey === 'basics') return; // 'basics' is not an array
+
+          const sectionArray = mergedResume[resumeKey] as any[] | undefined;
+          if (!sectionArray || sectionArray.length === 0) {
+            (mergedResume[resumeKey] as any) = [blankEntryMap[resumeKey]];
           }
-        }
+        });
+        
+        return mergedState;
       }
     }
   )

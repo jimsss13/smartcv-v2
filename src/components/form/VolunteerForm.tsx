@@ -8,7 +8,6 @@ export function VolunteerForm() {
 
   return (
     <section>
-      <h2 className="text-2xl font-semibold mb-4">Volunteer Experience</h2>
       {(volunteer || []).map((vol, i) => (
         <div key={i} className="border rounded-lg p-4 mb-4 bg-gray-50">
           <input 

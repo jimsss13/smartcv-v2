@@ -8,7 +8,6 @@ export function AdvisoryForm() {
 
   return (
     <section>
-      <h2 className="text-2xl font-semibold mb-4">Advisory Roles</h2>
       {(advisory || []).map((role, i) => (
         <div key={i} className="border rounded-lg p-4 mb-4 bg-gray-50">
           <input placeholder="Organization" value={role.organization || ""} onChange={(e) => updateField(`advisory.${i}.organization`, e.target.value)} className="border p-2 rounded w-full mb-2"/>

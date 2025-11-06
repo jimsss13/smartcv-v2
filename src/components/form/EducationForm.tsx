@@ -12,7 +12,6 @@ export function EducationForm({ selectedTemplate }: Props) {
 
   return (
     <section>
-      <h2 className="text-2xl font-semibold mb-4">Education</h2>
       {(education || []).map((edu, i) => (
         <div key={i} className="border rounded-lg p-4 mb-4 bg-gray-50">
           <input placeholder="Institution" value={edu.institution || ""} onChange={(e) => updateField(`education.${i}.institution`, e.target.value)} className="border p-2 rounded w-full mb-2"/>

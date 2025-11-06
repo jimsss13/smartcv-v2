@@ -9,7 +9,7 @@ interface Props {
 
 export function ResumePreviewTraditional({ data }: Props) {
   // Only render if there is at least a name
-  if (!data.basics.name) {
+  if (!data.basics.name?.trim()) {
     return (
       <article className="trad-theme trad-container flex items-center justify-center min-h-[297mm]">
         <p className="text-gray-400">Enter data in the form to see a preview.</p>

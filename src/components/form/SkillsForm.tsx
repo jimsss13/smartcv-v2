@@ -8,7 +8,6 @@ export function SkillsForm() {
 
   return (
     <section>
-      <h2 className="text-2xl font-semibold mb-4">Skills</h2>
       {(skills || []).map((skill, i) => (
         <div key={i} className="border rounded-lg p-4 mb-4 bg-gray-50">
           <input placeholder="Skill Name (e.g., Web Development)" value={skill.name || ""} onChange={(e) => updateField(`skills.${i}.name`, e.target.value)} className="border p-2 rounded w-full mb-2"/>

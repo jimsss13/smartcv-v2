@@ -11,7 +11,6 @@ export function BasicsForm({ selectedTemplate }: Props) {
 
   return (
     <section>
-      <h2 className="text-2xl font-semibold mb-4">Personal Details</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <input placeholder="Full Name" value={basics.name} onChange={(e) => updateField("basics.name", e.target.value)} className="border p-2 rounded bg-gray-50"/>
         <input placeholder="Job Title / Label" value={basics.label} onChange={(e) => updateField("basics.label", e.target.value)} className="border p-2 rounded bg-gray-50"/>

@@ -1,17 +1,27 @@
-import { Resume } from "@/types/resume";
+import { Resume, Publication } from "@/types/resume";
 
 interface PublicationsProps {
-  publications: Resume["publications"];
+  publications: Publication[] | undefined;
+}
+
+function isPublicationEmpty(pub: Publication) {
+  if (!pub) return true;
+  return !pub.name?.trim() && 
+         !pub.publisher?.trim() && 
+         !pub.releaseDate?.trim();
 }
 
 export function Publications({ publications }: PublicationsProps) {
-  if (!publications?.length) return null;
+  const filteredPublications = publications?.filter(p => !isPublicationEmpty(p));
+
+  if (!filteredPublications || filteredPublications.length === 0) return null;
+  
   return (
     <section className="mb-8 break-inside-avoid">
       <h2 className="uppercase font-semibold tracking-wide border-b border-gray-400 pb-1 text-sm mb-3">
         Publications
       </h2>
-      {publications.map((pub, index) => (
+      {filteredPublications.map((pub, index) => (
         <div key={index} className="mb-3">
           <h3 className="font-semibold">{pub.name}</h3>
           <p className="text-sm">

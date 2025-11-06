@@ -5,6 +5,17 @@ interface Props {
 }
 
 export function BasicsSection({ basics }: Props) {
+  // Build location string, filtering out empty parts
+  const locationParts = [
+    basics.location?.address,
+    basics.location?.city,
+    basics.location?.region,
+    basics.location?.postalCode,
+    basics.location?.countryCode,
+  ].filter(part => part?.trim());
+
+  const locationString = locationParts.join(" ");
+
   return (
     <header className="flex flex-col md:flex-row">
       {/* Photo */}
@@ -26,14 +37,14 @@ export function BasicsSection({ basics }: Props) {
         <h1 className="text-4xl font-bold">{basics.name}</h1>
         <h2 className="text-2xl font-light">{basics.label}</h2>
         <div className="mt-4 space-y-1 text-sm">
-          <p>
-            {basics.location?.address} {basics.location?.city} {basics.location?.region} {basics.location?.postalCode} {basics.location?.countryCode}
-          </p>
+          {/* Only show location if it has content */}
+          {locationString && <p>{locationString}</p>}
+          
           <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {basics.phone && <p>{basics.phone}</p>}
-            {basics.email && <p>{basics.email}</p>}
+            {basics.phone?.trim() && <p>{basics.phone}</p>}
+            {basics.email?.trim() && <p>{basics.email}</p>}
           </div>
-          {basics.url && <p>{basics.url}</p>}
+          {basics.url?.trim() && <p>{basics.url}</p>}
         </div>
       </div>
     </header>

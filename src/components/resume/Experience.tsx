@@ -1,18 +1,31 @@
-import { Resume } from "@/types/resume";
+import { Resume, Work } from "@/types/resume";
 
 interface ExperienceProps {
-  work: Resume["work"];
+  work: Work[];
+}
+
+// Helper function to check if a job entry is actually empty (trims strings)
+function isJobEmpty(job: Work) {
+  if (!job) return true;
+  return !job.name?.trim() && 
+         !job.position?.trim() && 
+         !job.summary?.trim() && 
+         (!job.highlights || job.highlights.filter(h => h.trim()).length === 0);
 }
 
 export function Experience({ work }: ExperienceProps) {
-  if (!work?.length) return null;
+  // 1. Filter out any jobs that are "empty"
+  const filteredWork = work.filter(job => !isJobEmpty(job));
+
+  // 2. If the filtered array is empty, render nothing at all.
+  if (filteredWork.length === 0) return null;
 
   return (
     <section className="mb-8 break-inside-avoid">
       <h2 className="uppercase font-semibold tracking-wide border-b border-gray-400 pb-1 text-sm mb-3">
         Experience
       </h2>
-      {work.map((job, index) => (
+      {filteredWork.map((job, index) => (
         <div key={index} className="mb-5 break-inside-avoid">
           <div className="flex justify-between items-baseline">
             <div>
