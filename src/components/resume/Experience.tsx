@@ -16,14 +16,13 @@ export function Experience({ work }: ExperienceProps) {
         <div key={index} className="mb-5 break-inside-avoid">
           <div className="flex justify-between items-baseline">
             <div>
-              <h3 className="font-semibold">{job.company}</h3>
+              <h3 className="font-semibold">{job.name}</h3>
               <p className="italic text-sm">{job.position}</p>
             </div>
             <div className="text-sm text-gray-700 text-right">
               <p>
                 {job.startDate} – {job.endDate || "Present"}
               </p>
-              <p>{job.location}</p>
             </div>
           </div>
           <ul className="list-disc ml-6 mt-2 text-sm space-y-1">

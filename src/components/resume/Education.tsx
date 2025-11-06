@@ -25,13 +25,6 @@ export function Education({ education }: EducationProps) {
               <p>{edu.location}</p>
             </div>
           </div>
-          {edu.courses?.length > 0 && (
-            <ul className="list-disc ml-6 mt-2 text-sm">
-              {edu.courses.map((course, i) => (
-                <li key={i}>{course}</li>
-              ))}
-            </ul>
-          )}
         </div>
       ))}
     </section>
